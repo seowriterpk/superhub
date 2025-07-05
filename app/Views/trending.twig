@@ -1,0 +1,60 @@
+{% extends "base.twig" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-4">🔥 Trending Videos</h1>
+        <p class="text-gray-300">Most popular videos trending right now</p>
+    </div>
+    
+    <!-- Videos Grid -->
+    {% if videos %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 mb-8">
+            {% for video in videos %}
+                {% include 'components/video-card.twig' with {'video': video} %}
+            {% endfor %}
+        </div>
+        
+        <!-- Pagination -->
+        {% if pagination.total_pages > 1 %}
+            <div class="flex justify-center items-center space-x-2">
+                {% if pagination.has_prev %}
+                    <a href="/trending/{{ pagination.prev_page }}" 
+                       class="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 transition-colors">
+                        Previous
+                    </a>
+                {% endif %}
+                
+                {% for page in range(max(1, pagination.current_page - 2), min(pagination.total_pages, pagination.current_page + 2)) %}
+                    {% if page == pagination.current_page %}
+                        <span class="px-4 py-2 bg-red-600 text-white rounded">{{ page }}</span>
+                    {% else %}
+                        <a href="/trending/{{ page }}" 
+                           class="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 transition-colors">
+                            {{ page }}
+                        </a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if pagination.has_next %}
+                    <a href="/trending/{{ pagination.next_page }}" 
+                       class="px-4 py-2 bg-gray-800 rounded hover:bg-gray-700 transition-colors">
+                        Next
+                    </a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <!-- No Videos -->
+        <div class="text-center py-16">
+            <div class="text-6xl mb-4">📹</div>
+            <h2 class="text-2xl font-bold mb-4">No Trending Videos</h2>
+            <p class="text-gray-400 mb-8">Check back later for trending content</p>
+            <a href="/" class="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition-colors">
+                Back to Home
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,126 @@
+
+{% extends 'base.twig' %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Hero Section -->
+    <section class="hero-section mb-12 text-center py-16 rounded-2xl">
+        <div class="max-w-4xl mx-auto">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6 text-white">
+                Premium Adult Videos
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">
+                Discover thousands of high-quality adult videos from top performers worldwide
+            </p>
+            
+            <!-- Search Form -->
+            <form action="/search" method="GET" class="max-w-2xl mx-auto">
+                <div class="relative">
+                    <input type="text" 
+                           name="query" 
+                           placeholder="Search for videos, categories, or performers..." 
+                           class="w-full px-6 py-4 text-lg rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white placeholder-gray-300 focus:outline-none focus:border-brand-red focus:bg-white/20 transition-all">
+                    <button type="submit" 
+                            class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-brand-red hover:bg-red-700 text-white px-6 py-2 rounded-full font-semibold transition-colors">
+                        Search
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Categories Section -->
+    {% if categories %}
+    <section class="mb-12">
+        <h2 class="text-3xl font-bold mb-6 text-center">Popular Categories</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {% for category in categories %}
+            <a href="/category/{{ category.slug }}" 
+               class="group bg-gray-800 hover:bg-gray-700 rounded-lg p-6 text-center transition-all transform hover:scale-105">
+                <h3 class="text-lg font-semibold group-hover:text-brand-red transition-colors">
+                    {{ category.name }}
+                </h3>
+                <p class="text-gray-400 text-sm mt-2">
+                    {{ category.video_count|number_format }} videos
+                </p>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Trending Videos -->
+    {% if trending_videos %}
+    <section class="mb-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-3xl font-bold">🔥 Trending Now</h2>
+            <a href="/trending" class="text-brand-red hover:text-red-400 font-semibold">View All →</a>
+        </div>
+        
+        <div class="video-grid above-fold">
+            {% for video in trending_videos %}
+                {% include 'components/video-card.twig' with {'video': video} %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Recent Videos -->
+    {% if recent_videos %}
+    <section class="mb-12">
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-3xl font-bold">🆕 Latest Additions</h2>
+            <a href="/latest" class="text-brand-red hover:text-red-400 font-semibold">View All →</a>
+        </div>
+        
+        <div class="video-grid">
+            {% for video in recent_videos %}
+                {% include 'components/video-card.twig' with {'video': video} %}
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Newsletter Signup -->
+    <section class="bg-gradient-to-r from-brand-red to-red-700 rounded-2xl p-8 text-center text-white">
+        <h2 class="text-2xl font-bold mb-4">Stay Updated</h2>
+        <p class="mb-6 text-red-100">Get notified about the latest premium content and exclusive releases</p>
+        <form class="max-w-md mx-auto flex gap-2">
+            <input type="email" 
+                   placeholder="Enter your email" 
+                   class="flex-1 px-4 py-2 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 text-white placeholder-red-200 focus:outline-none focus:border-white">
+            <button type="submit" 
+                    class="bg-white text-brand-red px-6 py-2 rounded-lg font-semibold hover:bg-gray-100 transition-colors">
+                Subscribe
+            </button>
+        </form>
+    </section>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// Track homepage interactions
+document.addEventListener('DOMContentLoaded', function() {
+    // Track category clicks
+    document.querySelectorAll('a[href^="/category/"]').forEach(link => {
+        link.addEventListener('click', function() {
+            VidSocial.trackEvent('homepage', 'category_click', this.textContent.trim());
+        });
+    });
+    
+    // Track hero search
+    document.querySelector('.hero-section form').addEventListener('submit', function() {
+        const query = this.querySelector('input[name="query"]').value;
+        VidSocial.trackEvent('homepage', 'hero_search', query);
+    });
+    
+    // Track newsletter signup
+    document.querySelector('section:last-child form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        VidSocial.trackEvent('homepage', 'newsletter_signup', 'attempt');
+        // Add actual newsletter signup logic here
+    });
+});
+</script>
+{% endblock %}

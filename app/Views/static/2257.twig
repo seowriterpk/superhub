@@ -1,0 +1,37 @@
+
+{% extends "base.twig" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+    <h1 class="text-3xl font-bold mb-8">18 U.S.C. 2257 Record-Keeping Requirements Compliance Statement</h1>
+    
+    <div class="prose prose-invert max-w-none">
+        <p class="text-gray-300 mb-6">
+            All models, actors, actresses and other persons that appear in any visual depiction of sexually 
+            explicit conduct appearing or otherwise contained in this website were over the age of eighteen 
+            years at the time of the creation of such depictions.
+        </p>
+        
+        <p class="text-gray-300 mb-6">
+            All other visual depictions displayed on this website are exempt from the provision of 18 U.S.C. 
+            section 2257 and 2257A because they do not portray conduct as specifically defined by 18 U.S.C 
+            section 2256 (2)(A) through (D), but are merely suggestive, and because they were created prior to 
+            July 3, 1995.
+        </p>
+        
+        <p class="text-gray-300 mb-6">
+            The records required by 18 U.S.C. 2257 and 2257A are kept by the Custodian of Records at the 
+            location(s) listed below. The location of the records is:
+        </p>
+        
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <p class="text-gray-300">
+                Custodian of Records<br>
+                {{ site_settings.site_name|default('VidSocial') }}<br>
+                Address: [Your Address]<br>
+                Email: {{ site_settings.records_email|default('records@example.com') }}
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}

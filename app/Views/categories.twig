@@ -1,0 +1,27 @@
+
+{% extends "base.twig" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-4">Video Categories</h1>
+        <p class="text-gray-300">Browse our collection of video categories</p>
+    </div>
+    
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        {% for category in categories %}
+            <a href="/category/{{ category.slug }}" 
+               class="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors text-center">
+                <h3 class="font-semibold mb-2 capitalize">{{ category.name }}</h3>
+                <p class="text-sm text-gray-400">{{ category.video_count }} videos</p>
+            </a>
+        {% endfor %}
+    </div>
+    
+    {% if categories is empty %}
+        <div class="text-center py-12">
+            <p class="text-xl text-gray-400">No categories available yet.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

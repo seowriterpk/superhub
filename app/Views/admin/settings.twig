@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ page_title }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white">
+    <div class="min-h-screen">
+        <!-- Header -->
+        <header class="bg-gray-800 border-b border-gray-700">
+            <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+                <h1 class="text-xl font-bold">Settings</h1>
+                <div class="space-x-4">
+                    <a href="/admin" class="hover:text-red-400">Dashboard</a>
+                    <a href="/admin/videos" class="hover:text-red-400">Videos</a>
+                    <a href="/admin/logout" class="hover:text-red-400">Logout</a>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="container mx-auto px-4 py-8 max-w-4xl">
+            {% if session.flash_message %}
+                <div class="bg-green-600 text-white p-4 rounded mb-6">
+                    {{ session.flash_message }}
+                </div>
+            {% endif %}
+            
+            <form method="POST" action="/admin/settings" class="space-y-6">
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Site Settings</h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div>
+                            <label for="site_name" class="block text-sm font-medium mb-2">Site Name</label>
+                            <input type="text" 
+                                   id="site_name" 
+                                   name="settings[site_name]" 
+                                   value="{{ settings.site_name|default('VidSocial') }}"
+                                   class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-red-500">
+                        </div>
+                        
+                        <div>
+                            <label for="contact_email" class="block text-sm font-medium mb-2">Contact Email</label>
+                            <input type="email" 
+                                   id="contact_email" 
+                                   name="settings[contact_email]" 
+                                   value="{{ settings.contact_email|default('') }}"
+                                   class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-red-500">
+                        </div>
+                        
+                        <div>
+                            <label for="dmca_email" class="block text-sm font-medium mb-2">DMCA Email</label>
+                            <input type="email" 
+                                   id="dmca_email" 
+                                   name="settings[dmca_email]" 
+                                   value="{{ settings.dmca_email|default('') }}"
+                                   class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-red-500">
+                        </div>
+                        
+                        <div>
+                            <label for="records_email" class="block text-sm font-medium mb-2">Records Email</label>
+                            <input type="email" 
+                                   id="records_email" 
+                                   name="settings[records_email]" 
+                                   value="{{ settings.records_email|default('') }}"
+                                   class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-red-500">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 rounded-lg p-6">
+                    <h2 class="text-xl font-bold mb-4">Analytics & Tracking</h2>
+                    
+                    <div>
+                        <label for="analytics_code" class="block text-sm font-medium mb-2">Analytics Code (Google Analytics, etc.)</label>
+                        <textarea id="analytics_code" 
+                                  name="settings[analytics_code]" 
+                                  rows="4"
+                                  placeholder="Paste your analytics tracking code here..."
+                                  class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-red-500">{{ settings.analytics_code|default('') }}</textarea>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end">
+                    <button type="submit" 
+                            class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-6 rounded transition-colors">
+                        Save Settings
+                    </button>
+                </div>
+            </form>
+        </main>
+    </div>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Age Verification - {{ site_settings.site_name }}</title>
+    <meta name="robots" content="noindex, nofollow">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
+    <div class="max-w-md mx-auto bg-gray-800 rounded-lg shadow-xl p-8 text-center">
+        <!-- Warning Icon -->
+        <div class="text-6xl mb-6">⚠️</div>
+        
+        <h1 class="text-2xl font-bold mb-4">Age Verification Required</h1>
+        
+        <div class="text-gray-300 mb-8 space-y-4">
+            <p>This website contains adult content and is intended for adults only.</p>
+            <p>You must be <strong>18 years of age or older</strong> to access this site.</p>
+            <p>By clicking "I am 18 or older", you confirm that:</p>
+            <ul class="text-left text-sm space-y-1 bg-gray-700 p-4 rounded">
+                <li>• You are at least 18 years old</li>
+                <li>• You are legally allowed to view adult content in your jurisdiction</li>
+                <li>• You understand this site contains explicit material</li>
+                <li>• You will not share this content with minors</li>
+            </ul>
+        </div>
+        
+        <form method="POST" action="/age-verify">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="hidden" name="return_url" value="{{ return_url|default(app.url()) }}">
+            
+            <div class="flex gap-4 justify-center">
+                <button type="submit" name="verified" value="1"
+                        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    I am 18 or older
+                </button>
+                
+                <button type="button" onclick="window.location.href='https://google.com'"
+                        class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors">
+                    Exit Site
+                </button>
+            </div>
+        </form>
+        
+        <p class="text-xs text-gray-500 mt-6">
+            By entering this site, you agree to our 
+            <a href="/privacy-policy" class="text-red-400 hover:text-red-300">Privacy Policy</a> and 
+            <a href="/2257" class="text-red-400 hover:text-red-300">Terms of Service</a>.
+        </p>
+    </div>
+</body>
+</html>

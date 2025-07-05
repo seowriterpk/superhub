@@ -1,0 +1,178 @@
+{% extends "base.twig" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <!-- Breadcrumbs -->
+    {% if breadcrumb_items %}
+    <nav class="mb-6">
+        <ol class="flex items-center space-x-2 text-sm text-gray-400">
+            {% for item in breadcrumb_items %}
+                {% if loop.last %}
+                    <li class="text-white">{{ item.name }}</li>
+                {% else %}
+                    <li>
+                        <a href="{{ item.url }}" class="hover:text-white transition-colors">{{ item.name }}</a>
+                        <span class="mx-2">/</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </nav>
+    {% endif %}
+    
+    <!-- Video Player Section -->
+    <div class="grid lg:grid-cols-3 gap-8">
+        <div class="lg:col-span-2">
+            <!-- Main Video -->
+            <div class="bg-gray-800 rounded-lg overflow-hidden mb-6">
+                <div class="aspect-video bg-black">
+                    {% if video.embed_url %}
+                        <iframe src="{{ video.embed_url }}" 
+                                width="100%" height="100%" 
+                                frameborder="0" 
+                                allowfullscreen>
+                        </iframe>
+                    {% else %}
+                        <div class="flex items-center justify-center h-full">
+                            <div class="text-center">
+                                <div class="text-6xl mb-4">▶️</div>
+                                <p class="text-gray-400">Video player not available</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Video Info -->
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h1 class="text-2xl font-bold mb-4">{{ video.title }}</h1>
+                
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                    {% if video.views %}
+                    <div class="flex items-center text-gray-400">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        {{ video.views|number_format }} views
+                    </div>
+                    {% endif %}
+                    
+                    {% if video.duration %}
+                    <div class="flex items-center text-gray-400">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        {% set minutes = (video.duration / 60)|round %}
+                        {{ minutes }}:{{ (video.duration % 60)|number_format(0, '.', '') }}
+                    </div>
+                    {% endif %}
+                    
+                    {% if video.created_at %}
+                    <div class="flex items-center text-gray-400">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        {{ video.created_at|date('M j, Y') }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Category -->
+                {% if video.category_name %}
+                <div class="mb-6">
+                    <span class="text-sm text-gray-400 mr-2">Category:</span>
+                    <a href="/category/{{ video.category_slug }}" 
+                       class="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded text-sm transition-colors">
+                        {{ video.category_name }}
+                    </a>
+                </div>
+                {% endif %}
+                
+                <!-- Description -->
+                {% if video.description %}
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Description</h3>
+                    <p class="text-gray-300 leading-relaxed">{{ video.description }}</p>
+                </div>
+                {% endif %}
+                
+                <!-- Tags -->
+                {% if tags %}
+                <div class="mb-6">
+                    <h3 class="text-lg font-semibold mb-3">Tags</h3>
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in tags %}
+                        <span class="bg-gray-700 text-gray-300 px-3 py-1 rounded-full text-sm">
+                            {{ tag.name }}
+                        </span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Rating -->
+                {% if video.rating %}
+                <div class="flex items-center">
+                    <span class="text-sm text-gray-400 mr-3">Rating:</span>
+                    <div class="flex text-yellow-400">
+                        {% for i in 1..5 %}
+                            <svg class="w-5 h-5 {{ video.rating >= i ? 'fill-current' : 'text-gray-600' }}" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                            </svg>
+                        {% endfor %}
+                    </div>
+                    <span class="text-sm text-gray-400 ml-2">({{ video.rating }}/5)</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Sidebar with Related Videos -->
+        <div class="lg:col-span-1">
+            {% if related_videos %}
+            <div class="bg-gray-800 rounded-lg p-6">
+                <h2 class="text-xl font-bold mb-6">Related Videos</h2>
+                <div class="space-y-4">
+                    {% for related in related_videos %}
+                    <div class="flex space-x-3">
+                        <div class="flex-shrink-0">
+                            <a href="/video/{{ related.slug }}-{{ related.eporner_id }}" class="block">
+                                <img src="{{ related.thumb_url }}" 
+                                     alt="{{ related.title }}" 
+                                     class="w-24 h-16 object-cover rounded">
+                            </a>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm font-medium leading-tight mb-1">
+                                <a href="/video/{{ related.slug }}-{{ related.eporner_id }}" 
+                                   class="hover:text-red-400 transition-colors line-clamp-2">
+                                    {{ related.title }}
+                                </a>
+                            </h3>
+                            <div class="text-xs text-gray-400">
+                                {% if related.views %}{{ related.views|number_format }} views{% endif %}
+                                {% if related.duration %}
+                                    {% set minutes = (related.duration / 60)|round %}
+                                    • {{ minutes }}:{{ (related.duration % 60)|number_format(0, '.', '') }}
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="mt-6">
+                    {% if video.category_slug %}
+                    <a href="/category/{{ video.category_slug }}" 
+                       class="block w-full text-center bg-red-600 hover:bg-red-700 text-white py-2 rounded transition-colors">
+                        More {{ video.category_name }} Videos
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
