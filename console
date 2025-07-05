@@ -1,0 +1,286 @@
+#!/usr/bin/env php
+<?php
+/**
+ * VidSocial Console Application - Enhanced with optimized API integration
+ */
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+use VidSocial\Core\Application;
+use VidSocial\Core\Database;
+use VidSocial\Services\SimplifiedEpornerClient;
+use VidSocial\Services\VideoSyncService;
+use VidSocial\Models\Video;
+use VidSocial\Models\Category;
+use VidSocial\Models\Tag;
+use VidSocial\Services\SitemapGenerator;
+
+// Load environment
+$dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+$dotenv->load();
+
+// CLI Colors
+class Colors {
+    public static $HEADER = "\033[95m";
+    public static $OKBLUE = "\033[94m";
+    public static $OKGREEN = "\033[92m";
+    public static $WARNING = "\033[93m";
+    public static $FAIL = "\033[91m";
+    public static $ENDC = "\033[0m";
+    public static $BOLD = "\033[1m";
+    public static $UNDERLINE = "\033[4m";
+}
+
+function colorize($text, $color) {
+    return $color . $text . Colors::$ENDC;
+}
+
+function log_info($message) {
+    echo colorize("[INFO] ", Colors::$OKGREEN) . $message . "\n";
+}
+
+function log_warning($message) {
+    echo colorize("[WARNING] ", Colors::$WARNING) . $message . "\n";
+}
+
+function log_error($message) {
+    echo colorize("[ERROR] ", Colors::$FAIL) . $message . "\n";
+}
+
+// Parse command line arguments
+$command = $argv[1] ?? 'help';
+$options = array_slice($argv, 2);
+
+// Initialize application
+try {
+    $app = Application::getInstance();
+    $db = Database::getInstance();
+    
+    switch ($command) {
+        case 'migrate':
+            runMigrations();
+            break;
+            
+        case 'sync:videos':
+            syncVideosOptimized($options);
+            break;
+            
+        case 'sync:category':
+            syncByCategory($options);
+            break;
+            
+        case 'sync:status':
+            syncVideoStatus();
+            break;
+            
+        case 'generate:sitemap':
+            generateSitemaps();
+            break;
+            
+        case 'api:test':
+            testApiConnection($options);
+            break;
+            
+        case 'help':
+        default:
+            showHelp();
+            break;
+    }
+    
+} catch (Exception $e) {
+    log_error($e->getMessage());
+    exit(1);
+}
+
+/**
+ * Optimized video sync using new services
+ */
+function syncVideosOptimized($options) {
+    $query = getOption($options, '--query', 'all');
+    $order = getOption($options, '--order', 'latest');
+    $perPage = (int)getOption($options, '--per_page', 1000);
+    $maxPages = (int)getOption($options, '--max_pages', 10);
+    $maxVideos = (int)getOption($options, '--max_videos', 10000);
+    $batchSize = (int)getOption($options, '--batch_size', 100);
+    
+    log_info("Starting optimized video sync...");
+    log_info("Query: {$query}, Order: {$order}, Per Page: {$perPage}, Max Pages: {$maxPages}");
+    log_info("Max Videos: {$maxVideos}, Batch Size: {$batchSize}");
+    
+    $syncService = new VideoSyncService();
+    
+    $syncOptions = [
+        'query' => $query,
+        'order' => $order,
+        'per_page' => $perPage,
+        'max_pages' => $maxPages,
+        'max_videos' => $maxVideos,
+        'batch_size' => $batchSize
+    ];
+    
+    $stats = $syncService->bulkSync($syncOptions);
+    
+    log_info("Optimized sync completed!");
+    log_info("Total processed: {$stats['total_processed']}");
+    log_info("New videos: {$stats['new_videos']}");
+    log_info("Updated videos: {$stats['updated_videos']}");
+    log_info("Errors: {$stats['errors']}");
+    log_info("Duration: {$stats['duration']} seconds");
+    
+    // Update sync timestamp
+    $db = Database::getInstance();
+    $db->query("UPDATE settings SET value = NOW() WHERE `key` = 'last_video_sync'");
+}
+
+/**
+ * Category-specific sync
+ */
+function syncByCategory($options) {
+    $category = getOption($options, '--category');
+    $maxVideos = (int)getOption($options, '--max_videos', 1000);
+    
+    if (!$category) {
+        log_error("Category is required. Use --category=category_name");
+        return;
+    }
+    
+    log_info("Starting category-specific sync for: {$category}");
+    
+    $syncService = new VideoSyncService();
+    $stats = $syncService->syncByCategory($category, $maxVideos);
+    
+    log_info("Category sync completed!");
+    log_info("Total processed: {$stats['total_processed']}");
+    log_info("New videos: {$stats['new_videos']}");
+    log_info("Updated videos: {$stats['updated_videos']}");
+}
+
+/**
+ * Test API connection
+ */
+function testApiConnection($options) {
+    $testQuery = getOption($options, '--query', 'test');
+    
+    log_info("Testing API connection...");
+    
+    $apiClient = new SimplifiedEpornerClient();
+    $response = $apiClient->getVideos(1, $testQuery, 10, 'latest');
+    
+    if ($response && !empty($response['videos'])) {
+        log_info("API connection successful!");
+        log_info("Found {$response['total']} total videos");
+        log_info("Retrieved " . count($response['videos']) . " videos in response");
+        
+        // Show first video details
+        $firstVideo = $response['videos'][0];
+        log_info("Sample video: {$firstVideo['title']} (ID: {$firstVideo['eporner_id']})");
+    } else {
+        log_error("API connection failed or no videos found");
+    }
+}
+
+/**
+ * Sync video status (check for removed videos) - optimized
+ */
+function syncVideoStatus() {
+    log_info("Starting optimized video status sync...");
+    
+    $syncService = new VideoSyncService();
+    $totalRemoved = $syncService->syncRemovedVideos();
+    
+    log_info("Status sync completed! Total removed: {$totalRemoved}");
+}
+
+/**
+ * Run database migrations
+ */
+function runMigrations() {
+    log_info("Running database migrations...");
+    
+    $schemaFile = __DIR__ . '/database/schema.sql';
+    if (!file_exists($schemaFile)) {
+        log_error("Schema file not found: {$schemaFile}");
+        return;
+    }
+    
+    $sql = file_get_contents($schemaFile);
+    $db = Database::getInstance();
+    
+    try {
+        $db->getConnection()->exec($sql);
+        log_info("Migrations completed successfully!");
+    } catch (PDOException $e) {
+        log_error("Migration failed: " . $e->getMessage());
+    }
+}
+
+/**
+ * Generate XML sitemaps
+ */
+function generateSitemaps() {
+    log_info("Generating sitemaps...");
+    
+    $generator = new SitemapGenerator();
+    
+    // Generate main sitemap
+    $mainSitemapPath = __DIR__ . '/public/sitemap.xml';
+    $generator->generateMainSitemap($mainSitemapPath);
+    log_info("Main sitemap generated: {$mainSitemapPath}");
+    
+    // Generate video sitemap
+    $videoSitemapPath = __DIR__ . '/public/video-sitemap.xml';
+    $generator->generateVideoSitemap($videoSitemapPath);
+    log_info("Video sitemap generated: {$videoSitemapPath}");
+    
+    // Update generation timestamp
+    $db = Database::getInstance();
+    $db->query("UPDATE settings SET value = NOW() WHERE `key` = 'last_sitemap_generation'");
+    
+    log_info("Sitemap generation completed!");
+}
+
+/**
+ * Get command line option value
+ */
+function getOption($options, $name, $default = null) {
+    foreach ($options as $option) {
+        if (strpos($option, $name . '=') === 0) {
+            return substr($option, strlen($name) + 1);
+        }
+    }
+    return $default;
+}
+
+/**
+ * Enhanced help information
+ */
+function showHelp() {
+    echo colorize("VidSocial Console Commands - Enhanced\n", Colors::$HEADER);
+    echo colorize("=====================================\n\n", Colors::$HEADER);
+    
+    echo colorize("Available Commands:\n", Colors::$BOLD);
+    echo "  migrate                    Run database migrations\n";
+    echo "  sync:videos               Optimized bulk video sync\n";
+    echo "  sync:category             Category-specific sync\n";
+    echo "  sync:status               Check and update video status\n";
+    echo "  api:test                  Test API connection\n";
+    echo "  generate:sitemap          Generate XML sitemaps\n";
+    echo "  help                      Show this help message\n\n";
+    
+    echo colorize("Enhanced Examples:\n", Colors::$BOLD);
+    echo "  php console migrate\n";
+    echo "  php console sync:videos --query=\"latest\" --per_page=1000 --max_pages=5 --batch_size=100\n";
+    echo "  php console sync:category --category=\"anal\" --max_videos=500\n";
+    echo "  php console api:test --query=\"test\"\n";
+    echo "  php console sync:status\n";
+    echo "  php console generate:sitemap\n\n";
+    
+    echo colorize("Optimized Sync Options:\n", Colors::$BOLD);
+    echo "  --query=VALUE             Search query (default: all)\n";
+    echo "  --order=VALUE             Order: latest, most-popular, most-viewed (default: latest)\n";
+    echo "  --per_page=NUMBER         Videos per API call (default: 1000, max: 1000)\n";
+    echo "  --max_pages=NUMBER        Maximum pages to process (default: 10)\n";
+    echo "  --max_videos=NUMBER       Maximum total videos (default: 10000)\n";
+    echo "  --batch_size=NUMBER       Database batch size (default: 100)\n";
+    echo "  --category=VALUE          Category name for category sync\n\n";
+}

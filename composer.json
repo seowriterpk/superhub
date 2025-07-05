@@ -1,0 +1,26 @@
+
+{
+    "name": "vidsocial/platform",
+    "description": "Adult Video Social Platform with Eporner API Integration",
+    "type": "project",
+    "require": {
+        "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.8",
+        "twig/twig": "^3.8",
+        "vlucas/phpdotenv": "^5.6",
+        "monolog/monolog": "^3.5"
+    },
+    "autoload": {
+        "psr-4": {
+            "VidSocial\\": "app/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5"
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "php -r \"copy('.env.example', '.env');\""
+        ]
+    }
+}
