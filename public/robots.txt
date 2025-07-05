@@ -1,0 +1,26 @@
+
+# VidSocial Robots.txt
+User-agent: *
+Allow: /
+Disallow: /storage/
+Disallow: /vendor/
+Disallow: /admin/
+Disallow: /api/
+Crawl-delay: 1
+
+# Adult content indicators
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot  
+Allow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: Twitterbot
+Disallow: /
+
+# Sitemaps
+Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://yourdomain.com/video-sitemap.xml

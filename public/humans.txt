@@ -1,0 +1,12 @@
+
+/* TEAM */
+Developer: VidSocial Development Team
+Contact: dev@yourdomain.com
+Location: Global
+
+/* SITE */
+Last update: 2025/01/01
+Language: English
+Standards: HTML5, CSS3, PHP 8.2, MySQL 8
+Components: Twig, Tailwind CSS, HLS.js
+SEO: Schema.org, OpenGraph, Video Sitemaps
